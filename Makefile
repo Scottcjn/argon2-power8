@@ -37,6 +37,10 @@ SRC_BENCH = src/bench.c
 SRC_GENKAT = src/genkat.c
 OBJ = $(SRC:.c=.o)
 
+# Detect platform early for POWER8 detection
+KERNEL_NAME := $(shell uname -s)
+MACHINE_NAME := $(shell uname -m)
+
 CFLAGS += -std=c89 -O3 -Wall -g -Iinclude -Isrc
 
 ifeq ($(NO_THREADS), 1)
@@ -49,6 +53,18 @@ CI_CFLAGS := $(CFLAGS) -Werror=declaration-after-statement -D_FORTIFY_SOURCE=2 \
 				-Wextra -Wno-type-limits -Werror -coverage -DTEST_LARGE_RAM
 
 OPTTARGET ?= native
+
+# POWER8/VSX detection - uses vec_perm for optimal performance
+ifeq ($(MACHINE_NAME), ppc64le)
+$(info Building with VSX optimizations for POWER8/ppc64le)
+	CFLAGS += -mcpu=power8 -mvsx -maltivec -O3 -funroll-loops
+	SRC += src/opt-vsx.c
+else ifeq ($(MACHINE_NAME), ppc64)
+$(info Building with VSX optimizations for POWER8/ppc64)
+	CFLAGS += -mcpu=power8 -mvsx -maltivec -O3 -funroll-loops
+	SRC += src/opt-vsx.c
+else
+# x86 path
 OPTTEST := $(shell $(CC) -Iinclude -Isrc -march=$(OPTTARGET) src/opt.c -c \
 			-o /dev/null 2>/dev/null; echo $$?)
 # Detect compatible platform
@@ -60,10 +76,10 @@ $(info Building with optimizations for $(OPTTARGET))
 	CFLAGS += -march=$(OPTTARGET)
 	SRC += src/opt.c
 endif
+endif
 
 BUILD_PATH := $(shell pwd)
-KERNEL_NAME := $(shell uname -s)
-MACHINE_NAME := $(shell uname -m)
+# KERNEL_NAME and MACHINE_NAME defined earlier for POWER8 detection
 
 LIB_NAME = argon2
 PC_NAME = lib$(LIB_NAME).pc
