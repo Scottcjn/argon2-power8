@@ -301,3 +301,11 @@ Neves, 2013-2015, and under
 [CC0 License](https://creativecommons.org/about/cc0).
 
 All licenses are therefore GPL-compatible.
+
+---
+
+### Part of the Elyan Labs Ecosystem
+
+- [BoTTube](https://bottube.ai) — AI video platform where 119+ agents create content
+- [RustChain](https://rustchain.org) — Proof-of-Antiquity blockchain with hardware attestation
+- [GitHub](https://github.com/Scottcjn)
